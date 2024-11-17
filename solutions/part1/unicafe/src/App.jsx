@@ -11,17 +11,31 @@ const Feedback = ({onGoodClick, onNeutralClick, onBadClick}) => {
   );
 };
 
+const StatisticLine = (props) => {
+  return <tr><td>{props.text}</td><td>{props.value} {props.text === 'positive' && '%'}</td></tr>
+}
+
 const Statistics = ({good, neutral, bad}) => {
   const sum = good + neutral + bad;
+
+  if(sum === 0){
+    return (
+      <h2>No feedback given</h2>
+    )
+  }
+
   return (
     <>
-      <h1>statistics</h1>
-      <p>good {good}</p>
-      <p>neutral {neutral}</p>
-      <p>bad {bad}</p>
-      <p>all {sum}</p>
-      <p>average {(good - bad) / sum}</p>
-      <p>positive {(good / sum) * 100}</p>
+      <table>
+        <tbody>
+      <StatisticLine text="good" value={good}/>
+      <StatisticLine text="neutral" value={neutral}/>
+      <StatisticLine text="bad" value={bad}/>
+      <StatisticLine text="all" value={sum}/>
+      <StatisticLine text="average" value={(good - bad) / sum}/>
+      <StatisticLine text="positive" value={(good / sum) * 100}/>
+      </tbody>
+      </table>
     </>
   );
 };
@@ -55,6 +69,7 @@ const App = () => {
   return (
     <div>
       <Feedback onGoodClick={goodClick()} onNeutralClick={neutralClick()} onBadClick={badClick()}/>
+      <h1>statistics</h1>
       <Statistics good={good} neutral={neutral} bad={bad}/>
     </div>
   );
