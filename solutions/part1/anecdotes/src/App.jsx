@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 const Button = (props) => {
-  return <button onClick={props.next}>{props.text}</button>
+  return <button onClick={props.onClick}>{props.text}</button>
 }
 
 const App = () => {
@@ -16,21 +16,39 @@ const App = () => {
     'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.',
     'The only way to go fast, is to go well.'
   ]
+
+  const arr = new Array(anecdotes.length + 1).join('0').split('').map(parseFloat)
+  //Output as [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
    
   const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState(arr)
 
   const nextAnecdotes = () => () => {
     let randomIndex = Math.floor(Math.random() * anecdotes.length);
-    console.log(randomIndex);
+    //console.log(randomIndex);
     setSelected(randomIndex)
   };
+
+  const newVote = () => () => {
+    const votesCopy = [...votes]
+    votesCopy[selected] = votes[selected] + 1;
+    setVotes(votesCopy)
+   /* setTimeout(()=>{
+      console.log(anecdotes[selected], votes[selected])
+    }, 2000)*/
+    
+  }
 
   return (
     <div>
       <div>
       {anecdotes[selected]}
       </div>
-      <Button next={nextAnecdotes()} text="next anecdotes"/>
+      <div>
+        has {votes[selected]} votes
+      </div>
+      <Button onClick={newVote()} text="vote"/>
+      <Button onClick={nextAnecdotes()} text="next anecdotes"/>
     </div>
   )
 }
