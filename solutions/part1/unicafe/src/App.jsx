@@ -12,12 +12,16 @@ const Feedback = ({onGoodClick, onNeutralClick, onBadClick}) => {
 };
 
 const Statistics = ({good, neutral, bad}) => {
+  const sum = good + neutral + bad;
   return (
     <>
       <h1>statistics</h1>
       <p>good {good}</p>
       <p>neutral {neutral}</p>
       <p>bad {bad}</p>
+      <p>all {sum}</p>
+      <p>average {(good - bad) / sum}</p>
+      <p>positive {(good / sum) * 100}</p>
     </>
   );
 };
