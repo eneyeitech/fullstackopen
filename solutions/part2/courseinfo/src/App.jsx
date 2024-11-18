@@ -44,6 +44,22 @@ const App = () => {
         },
       ],
     },
+    {
+      name: "Databases",
+      id: 2,
+      parts: [
+        {
+          name: "MySQL",
+          exercises: 3,
+          id: 1,
+        },
+        {
+          name: "Postgres",
+          exercises: 7,
+          id: 2,
+        },
+      ],
+    },
   ];
 
   return (
