@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import PersonList from "./components/PersonList";
 import { create, deletePerson, getAll, update } from "./services/person";
+import NotificationSuccess from "./components/NotificationSuccess";
+import NotificationFailure from "./components/NotificationFailure";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [failureMessage, setFailureMessage] = useState(null);
 
   useEffect(() => {
     getAll().then((data) => {
@@ -22,14 +25,36 @@ const App = () => {
     const nameFound = persons.find((person) => person.name === newName);
     const numberFound = persons.find((person) => person.number === newNumber);
     console.log("index", nameFound, numberFound);
-    if (nameFound && window.confirm(`${nameFound.name} is already added to the phonebook, replace the old number with a new one?`)) {
+    if (
+      nameFound &&
+      window.confirm(
+        `${nameFound.name} is already added to the phonebook, replace the old number with a new one?`
+      )
+    ) {
       //alert(`${newName} is already added to phonebook`);
-      const updatedPerson = {...nameFound, number: newNumber};
-      update(updatedPerson.id, updatedPerson).then(data=>{
-        setPersons(persons.map(person => person.id === data.id ? data : person));
-        setNewName("");
-        setNewNumber("");
-      })
+      const updatedPerson = { ...nameFound, number: newNumber };
+      update(updatedPerson.id, updatedPerson)
+        .then((data) => {
+          setPersons(
+            persons.map((person) => (person.id === data.id ? data : person))
+          );
+          setNewName("");
+          setNewNumber("");
+          setSuccessMessage(`${newName} updated succesfully`);
+          setTimeout(() => setSuccessMessage(null), 5000);
+        })
+        .catch((e) => {
+          setNewName("");
+          setNewNumber("");
+          setFailureMessage(
+            `the person '${newName}' was already deleted from server`
+          );
+          setPersons(
+            persons.filter((person) => person.id !== updatedPerson.id)
+          );
+          setTimeout(() => setFailureMessage(null), 5000);
+        });
+
       return;
     }
     if (nameFound) {
@@ -51,6 +76,8 @@ const App = () => {
       setNewName("");
       setNewNumber("");
     });
+    setSuccessMessage(`${newName} added succesfully`);
+    setTimeout(() => setSuccessMessage(null), 5000);
   };
 
   const handleDelete = (id) => {
@@ -71,6 +98,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <NotificationSuccess message={successMessage} />
+      <NotificationFailure message={failureMessage} />
+
       <Filter setSearchText={setSearchText} searchText={searchText} />
 
       <h2>add a new</h2>
