@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const Country = ({country}) => {
-  if(!country) return;
+const Country = ({ country }) => {
+  if (!country) return;
   const languages = Object.values(country.languages);
   return (
     <div>
@@ -10,13 +10,31 @@ const Country = ({country}) => {
       <p>capital {country.capital}</p>
       <p>area {country.area}</p>
       <h5>languages:</h5>
-      <ul>
-        {languages && languages.map(l=><li key={l}>{l}</li>)}
-      </ul>
-      <img src={country.flags.png}/>
+      <ul>{languages && languages.map((l) => <li key={l}>{l}</li>)}</ul>
+      <img src={country.flags.png} />
     </div>
-  )
-}
+  );
+};
+
+const Weather = ({ weather }) => {
+  if (!weather) return;
+  return (
+    <div style={{ marginTop: "20px" }}>
+      <h2>Weather in {weather.name}</h2>
+      <p>Temperature: {weather.main.temp}°C</p>
+      <p>Humidity: {weather.main.humidity}%</p>
+      <p>Conditions: {weather.weather[0].description}</p>
+      <p>Wind Speed: {weather.wind.speed} m/s</p>
+      <div>
+        <img
+          src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+          alt={weather.weather[0].description}
+          style={{ width: "100px", height: "100px" }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const App = () => {
   const [value, setValue] = useState("");
@@ -24,6 +42,11 @@ const App = () => {
   const [country, setCountry] = useState(null);
   const [filtered, setFiltered] = useState(null);
   const [singleCountry, setSingleCountry] = useState(null);
+  const [city, setCity] = useState(null);
+  const [weather, setWeather] = useState(null);
+  
+  const API_KEY = import.meta.env.VITE_API_KEY;
+;
 
   useEffect(() => {
     axios
@@ -34,50 +57,70 @@ const App = () => {
       });
   }, []);
 
-  useEffect(()=>{
-    if(!filtered) return;
-    if(filtered.length === 1){
-      setSingleCountry(filtered[0])
-    }else{
-      setSingleCountry(null)
+  useEffect(() => {
+    if (!filtered) return;
+    if (filtered.length === 1) {
+      setSingleCountry(filtered[0]);
+    } else {
+      setSingleCountry(null);
     }
-  },[filtered])
+  }, [filtered]);
 
-  useEffect(()=>{
-    if(!singleCountry){
-       setCountry(null)
-       return;
+  useEffect(() => {
+    if (!singleCountry) {
+      setCountry(null);
+      setCity(null);
+      return;
     }
     axios
-      .get(`https://studies.cs.helsinki.fi/restcountries/api/name/${singleCountry}`)
+      .get(
+        `https://studies.cs.helsinki.fi/restcountries/api/name/${singleCountry}`
+      )
       .then((response) => {
         const country = response.data;
-        setCountry(country)
+        setCountry(country);
+        setCity(country.capital[0]);
       });
-  },[singleCountry]);
+  }, [singleCountry]);
 
   const handleChange = (event) => {
     console.log(event.target.value);
     setValue(event.target.value);
   };
 
-  
-  useEffect(()=>{
-    if(!names) return;
-    
+  const handleFetch = (name) => {
+    setSingleCountry(name);
+  };
+
+  useEffect(() => {
+    if (!city) {
+      setWeather(null);
+      return;
+    }
+    axios
+      .get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      )
+      .then((response) => {
+        setWeather(response.data);
+      });
+  }, [city]);
+
+  useEffect(() => {
+    if (!names) return;
+
     const filteredNames = names.filter((n) =>
       n.toLowerCase().includes(value.toLowerCase())
     );
     console.log(filteredNames);
-    setFiltered(filteredNames)
-  
-  },[names, value])
+    setFiltered(filteredNames);
+  }, [names, value]);
 
-  
-
-  if(country){
-    console.log('country: ', country);
+  if (country) {
+    console.log("country: ", country);
   }
+
+  if (!names) return;
 
   return (
     <div>
@@ -88,11 +131,17 @@ const App = () => {
           filtered.length > 0 &&
           filtered.length <= 10 &&
           !country &&
-          filtered.map((n) => <p key={n}>{n}</p>)}
+          filtered.map((n) => (
+            <p key={n}>
+              {n}
+              <button onClick={() => handleFetch(n)}>show</button>
+            </p>
+          ))}
       </div>
-      <Country country={country}/>
+      <Country country={country} />
+      <Weather weather={weather} />
     </div>
   );
 };
 
-export default App; 
+export default App;
