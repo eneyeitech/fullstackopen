@@ -55,7 +55,7 @@ const App = () => {
         },
         {
           name: "Postgres",
-          exercises: 7,
+          exercises: 2,
           id: 2,
         },
       ],
